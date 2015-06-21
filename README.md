@@ -1,6 +1,6 @@
-# seed-element
+# radial-time
 
-An element providing a starting point for your own reusable Polymer elements.
+Polymer component providing a time picker based on Android's (4.4 and up) native widget.
 
 
 ## Dependencies

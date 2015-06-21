@@ -1,23 +1,9 @@
-<!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../polymer-styles/polymer-styles.html"/>
 
 <!--
-An element providing a solution to no problem in particular.
-
-Example:
-
-@group Seed Elements
-@element seed-element
+@element radial-time
 @demo demo/index.html
-@hero hero.svg
 -->
 <dom-module id="radial-time">
 
@@ -25,25 +11,26 @@ Example:
     :host {
       display: block;
       box-sizing: border-box;
-      background-color: #343434;
+      background-color: var(--radial-time-primary-bg-color, #363636);
       color: white;
       font-family: "Roboto", Arial, sans;
       width: 20em;
     }
     .time {
       text-align: center;
-      font-size: 4em;
-      font-weight: lighter;
-      background-color: #121212;
+      font-size: 4.2em;
+      line-height: 1.7em;
+      font-weight: 300;
+      background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
     }
     .time .selected {
-      color: red;
+      color: var(--radial-time-highlight-color, #FF3333);
     }
     .dial {
-      margin: 1.5em 1em;
-      background-color: #121212;
-      width: 18em;
-      height: 18em;
+      margin: 1em 2em;
+      background-color: var(--radial-time-background, #3e3e3e);
+      width: 16em;
+      height: 16em;
       border-radius: 50%;
       position: relative;
     }
@@ -59,23 +46,25 @@ Example:
       margin:-.5em 0 0 -1em;
       font-weight:bold;
     }
-    .dial span:nth-child(1) { transform: translate(4.00em, -6.93em); }
-    .dial span:nth-child(2) { transform: translate(6.93em, -4.00em); }
-    .dial span:nth-child(3) { transform: translate(8.00em, 0.00em); }
-    .dial span:nth-child(4) { transform: translate(6.93em, 4.00em); }
-    .dial span:nth-child(5) { transform: translate(4.00em, 6.93em); }
-    .dial span:nth-child(6) { transform: translate(0.00em, 8.00em); }
-    .dial span:nth-child(7) { transform: translate(-4.00em, 6.93em); }
-    .dial span:nth-child(8) { transform: translate(-6.93em, 4.00em); }
-    .dial span:nth-child(9) { transform: translate(-8.00em, 0.00em); }
-    .dial span:nth-child(10) { transform: translate(-6.93em, -4.00em); }
-    .dial span:nth-child(11) { transform: translate(-4.00em, -6.93em); }
-    .dial span:nth-child(12) { transform: translate(-0.00em, -8.00em); }
+
+    .dial span:nth-child(1) { transform: translate(3.23em, -5.59em); }
+    .dial span:nth-child(2) { transform: translate(5.59em, -3.22em); }
+    .dial span:nth-child(3) { transform: translate(6.45em, 0.00em); }
+    .dial span:nth-child(4) { transform: translate(5.59em, 3.22em); }
+    .dial span:nth-child(5) { transform: translate(3.23em, 5.59em); }
+    .dial span:nth-child(6) { transform: translate(0.00em, 6.45em); }
+    .dial span:nth-child(7) { transform: translate(-3.22em, 5.59em); }
+    .dial span:nth-child(8) { transform: translate(-5.59em, 3.22em); }
+    .dial span:nth-child(9) { transform: translate(-6.45em, 0.00em); }
+    .dial span:nth-child(10) { transform: translate(-5.59em, -3.23em); }
+    .dial span:nth-child(11) { transform: translate(-3.23em, -5.59em); }
+    .dial span:nth-child(12) { transform: translate(-0.00em, -6.45em); }
+
 
     .dial .hand {
       width: 0.08em;
-      height: 7em;
-      background-color: rgba(255,0,0,.4);
+      height: 5.2em;
+      background-color: var(--radial-time-highlight-color, #FF3333);
       top: 50%;
       left: 50%;
       position: absolute;
@@ -83,14 +72,14 @@ Example:
       transform: rotate(270deg);
     }
     .dial .hand:after {
-      width: 2em;
-      height: 2em;
+      width: 2.5em;
+      height: 2.5em;
       background-color: rgba(255,0,0,.4);
       border-radius: 50%;
       display: block;
       content: " ";
-      margin: -1em 0 0 -1em;
-      top: 8em;
+      margin: -1.25em 0 0 -1.25em;
+      top: 6.45em;
       left: 50%;
       position: absolute;
     }
@@ -165,10 +154,18 @@ Example:
 
     detached: function() { },
 
-    _rotate(angle) {
+    _rotate: function(angle) {
       var hand = document.querySelector('#hand');
       angle = angle - 180;
       this.transform('rotate(' + angle + 'deg)', this.$.hand);
+    },
+
+    _pad: function(number, size) {
+      var number = number.toString();
+      while (number.length < size) {
+        number = '0' + number;
+      }
+      return number;
     },
 
     onHourClicked: function (ev) {
@@ -182,14 +179,14 @@ Example:
     onSelectedChanged: function () {
       this.toggleClass('selected', this.selected == 'hour', this.$.hour);
       this.toggleClass('selected', this.selected == 'minute', this.$.minute);
-      handles = document.querySelectorAll('#dial span');
+      var handles = document.querySelectorAll('#dial span');
       for (var i = 0; i < handles.length; i++) {
         var handle = handles[i];
         var value;
         if (this.selected == 'hour') {
-          value = i + 1;
+          value = this._pad(i + 1, 2);
         } else if (this.selected == 'minute') {
-          value = (i + 1) * 5;
+          value = this._pad((i + 1) * 5 % 60, 2);
         }
         handle.textContent = value;
       }
@@ -201,7 +198,7 @@ Example:
       var top = dial.offsetTop;
       var height = dial.offsetHeight;
       var width = dial.offsetWidth;
-      position = {
+      var position = {
         x: ev.pageX - left - width / 2,
         y: ev.pageY - top - height / 2
       }
@@ -217,9 +214,9 @@ Example:
       var angle = steppedAngle * step
 
       if (this.selected == 'hour') {
-        this.hour = ((steppedAngle + 2 + 12) % 12) + 1;
+        this.hour = this._pad(((steppedAngle + 2 + 12) % 12) + 1, 2);
       } else {
-        this.minute = ((steppedAngle + 15 + 60) % 60);
+        this.minute = this._pad(((steppedAngle + 15 + 60) % 60), 2);
       }
       this._rotate(angle + 90);
     }
