@@ -77,7 +77,7 @@
     .dial .hand:after {
       width: 2.5em;
       height: 2.5em;
-      background-color: rgba(255,0,0,.4);
+      background-color: rgba(255,0,0,.2);
       border-radius: 50%;
       display: block;
       content: " ";
@@ -86,16 +86,19 @@
       left: 50%;
       position: absolute;
     }
+    .dial .hand.activated {
+      height: 6.4em;
+    }
 
     .dial .hand.activated:before {
       width: .5em;
       height: .5em;
-      background-color: rgba(255,0,0,.9);
+      background-color: var(--radial-time-highlight-color, #FF3333);
       border-radius: 50%;
       display: block;
       content: " ";
       margin: -.25em 0 0 -.25em;
-      top: 8em;
+      top: 6.45em;
       left: 50%;
       position: absolute;
     }
@@ -213,7 +216,7 @@
       var position = {
         x: ev.pageX - left - width / 2,
         y: ev.pageY - top - height / 2
-      }
+      };
       var angle = Math.atan2(position.y, position.x) * (180 / Math.PI);
       var step;
       if (this.selected == 'hour') {
@@ -222,13 +225,13 @@
         step = 6;
       }
 
-      var steppedAngle = Math.round(angle / step)
-      var angle = steppedAngle * step
-
+      var steppedAngle = Math.round(angle / step);
+      angle = steppedAngle * step;
       if (this.selected == 'hour') {
         this.hour = this._pad(((steppedAngle + 2 + 12) % 12) + 1, 2);
       } else {
         this.minute = this._pad(((steppedAngle + 15 + 60) % 60), 2);
+        this.toggleClass('activated', this.minute % 5 != 0, this.$.hand);
       }
       this._rotate(angle + 90);
     }
