@@ -2,7 +2,7 @@ import math
 
 
 selector = ".dial span"
-l = 6.45
+l = 6.5
 for i in range(1, 13):
     a = math.radians((i - 3) * 30)
     x = math.cos(a) * l

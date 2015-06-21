@@ -16,6 +16,7 @@
       font-family: "Roboto", Arial, sans;
       width: 20em;
       font-weight: 500;
+      box-shadow: .1em .3em .3em rgba(0,0,0,.3);
     }
     .time {
       text-align: center;
@@ -38,29 +39,30 @@
     .dial span {
       font-size: 1em;
       display: block;
-      width: 2em;
-      height: 1em;
+      text-align: center;
+      width: 1.5em;
+      height: 1.5em;
       position: absolute;
       top:50%; left:50%;
-      line-height:1em;
+      line-height:1.6em;
       text-align:center;
-      margin:-.5em 0 0 -1em;
+      margin-top:-.75em;
+      margin-left: -.75em;
       font-weight:bold;
     }
 
-    .dial span:nth-child(1) { transform: translate(3.23em, -5.59em); }
-    .dial span:nth-child(2) { transform: translate(5.59em, -3.22em); }
-    .dial span:nth-child(3) { transform: translate(6.45em, 0.00em); }
-    .dial span:nth-child(4) { transform: translate(5.59em, 3.22em); }
-    .dial span:nth-child(5) { transform: translate(3.23em, 5.59em); }
-    .dial span:nth-child(6) { transform: translate(0.00em, 6.45em); }
-    .dial span:nth-child(7) { transform: translate(-3.22em, 5.59em); }
-    .dial span:nth-child(8) { transform: translate(-5.59em, 3.22em); }
-    .dial span:nth-child(9) { transform: translate(-6.45em, 0.00em); }
-    .dial span:nth-child(10) { transform: translate(-5.59em, -3.23em); }
-    .dial span:nth-child(11) { transform: translate(-3.23em, -5.59em); }
-    .dial span:nth-child(12) { transform: translate(-0.00em, -6.45em); }
-
+    .dial span:nth-child(1) { transform: translate(3.25em, -5.63em); }
+    .dial span:nth-child(2) { transform: translate(5.63em, -3.25em); }
+    .dial span:nth-child(3) { transform: translate(6.50em, 0.00em); }
+    .dial span:nth-child(4) { transform: translate(5.63em, 3.25em); }
+    .dial span:nth-child(5) { transform: translate(3.25em, 5.63em); }
+    .dial span:nth-child(6) { transform: translate(0.00em, 6.50em); }
+    .dial span:nth-child(7) { transform: translate(-3.25em, 5.63em); }
+    .dial span:nth-child(8) { transform: translate(-5.63em, 3.25em); }
+    .dial span:nth-child(9) { transform: translate(-6.50em, 0.00em); }
+    .dial span:nth-child(10) { transform: translate(-5.63em, -3.25em); }
+    .dial span:nth-child(11) { transform: translate(-3.25em, -5.63em); }
+    .dial span:nth-child(12) { transform: translate(-0.00em, -6.50em); }
 
     .dial .hand {
       width: 0.08em;
