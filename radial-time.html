@@ -1,5 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../polymer-styles/polymer-styles.html"/>
+<link rel="import" href="../paper-styles/paper-styles.html"/>
+<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html"/>
+<link rel="import" href="../neon-animation/neon-animations.html"/>
+
 
 <!--
 @element radial-time
@@ -23,10 +26,16 @@
       font-size: 4.2em;
       line-height: 1.7em;
       font-weight: 300;
+      height: 1.7em;
       background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
     }
     .time .selected {
       color: var(--radial-time-highlight-color, #FF3333);
+      animation: bounce 0.3s ease-out;
+    }
+    @keyframes bounce {
+      50% { transform: scale(0.9) }
+      75% { transform: scale(1.1) }
     }
     .dial {
       margin: 1em 2em;
@@ -35,7 +44,31 @@
       height: 16em;
       border-radius: 50%;
       position: relative;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
+
+    .numbers {
+      background-color: #006064;
+      display: block;
+      position: relative;
+      top:50%; left:0%;
+      transition: all .3s cubic-bezier(0.635, -0.580, 0.380, 0.870);
+    }
+    #hours.hidden {
+      opacity: 0;
+      transform: scale(1.2);
+    }
+
+    #minutes.hidden {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
     .dial span {
       font-size: 1em;
       display: block;
@@ -113,21 +146,37 @@
 
   <template>
     <div class="time">
-      <span id="hour">{{hour}}</span>:<span id="minute">{{minute}}</span>
+      <span id="hour">{{hour}}</span>:<span id="minute">{{_pad(minute, 2)}}</span>
     </div>
     <div class="dial" id="dial">
-      <span>1</span>
-      <span>2</span>
-      <span>3</span>
-      <span>4</span>
-      <span>5</span>
-      <span>6</span>
-      <span>7</span>
-      <span>8</span>
-      <span>9</span>
-      <span>10</span>
-      <span>11</span>
-      <span>12</span>
+      <div class="numbers" id="hours">
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>4</span>
+        <span>5</span>
+        <span>6</span>
+        <span>7</span>
+        <span>8</span>
+        <span>9</span>
+        <span>10</span>
+        <span>11</span>
+        <span>12</span>
+      </div>
+      <div class="numbers" id="minutes">
+        <span>05</span>
+        <span>10</span>
+        <span>15</span>
+        <span>20</span>
+        <span>25</span>
+        <span>30</span>
+        <span>35</span>
+        <span>40</span>
+        <span>45</span>
+        <span>50</span>
+        <span>55</span>
+        <span>00</span>
+      </div>
       <div class="hand" id="hand"></div>
     </div>
     <div id="button">
@@ -149,6 +198,24 @@
         type: String,
         value: "hour",
         observer: "onSelectedChanged"
+      },
+      animationConfig: {
+        value: function() {
+          return {
+            'flash-hand': [
+              {
+                  name: 'fade-out-animation',
+                  node: this.$.hand,
+                  timing: {duration: 50}
+              },
+              {
+                name: 'fade-in-animation',
+                node: this.$.hand,
+                timing: {delay: 50, duration: 300}
+              }
+            ]
+          }
+        }
       }
     },
 
@@ -158,19 +225,25 @@
       'dial.mousedown': 'onDragStart',
       'dial.touchstart': 'onDragStart'
     },
-
+    behaviors: [
+      Polymer.NeonAnimationRunnerBehavior
+    ],
     ready: function() { },
 
     attached: function() {
-      var angle = (this.hour) * 30;
-      this._rotate(angle);
-      this.onSelectedChanged();
+      this._rotateHand();
+      this.onSelectedChanged(this.selected, this.selected);
     },
 
     detached: function() { },
 
-    _rotate: function(angle) {
-      var hand = document.querySelector('#hand');
+    _rotateHand: function() {
+      var angle;
+      if (this.selected == 'hour') {
+        angle = this.hour * 30;
+      } else {
+        angle = this.minute * 6;
+      }
       angle = angle - 180;
       this.transform('rotate(' + angle + 'deg)', this.$.hand);
     },
@@ -191,19 +264,16 @@
       this.selected = 'minute';
     },
 
-    onSelectedChanged: function () {
+    onSelectedChanged: function (newValue, oldValue) {
       this.toggleClass('selected', this.selected == 'hour', this.$.hour);
       this.toggleClass('selected', this.selected == 'minute', this.$.minute);
-      var handles = document.querySelectorAll('#dial span');
-      for (var i = 0; i < handles.length; i++) {
-        var handle = handles[i];
-        var value;
-        if (this.selected == 'hour') {
-          value = this._pad(i + 1, 2);
-        } else if (this.selected == 'minute') {
-          value = this._pad((i + 1) * 5 % 60, 2);
-        }
-        handle.textContent = value;
+
+      this.toggleClass('hidden', this.selected != 'hour', this.$.hours);
+      this.toggleClass('hidden', this.selected != 'minute', this.$.minutes);
+      this._rotateHand();
+
+      if (newValue != oldValue && oldValue) {
+        this.playAnimation('flash-hand');
       }
     },
 
@@ -228,12 +298,12 @@
       var steppedAngle = Math.round(angle / step);
       angle = steppedAngle * step;
       if (this.selected == 'hour') {
-        this.hour = this._pad(((steppedAngle + 2 + 12) % 12) + 1, 2);
+        this.hour = ((steppedAngle + 2 + 12) % 12) + 1;
       } else {
-        this.minute = this._pad(((steppedAngle + 15 + 60) % 60), 2);
+        this.minute = ((steppedAngle + 15 + 60) % 60);
         this.toggleClass('activated', this.minute % 5 != 0, this.$.hand);
       }
-      this._rotate(angle + 90);
+      this._rotateHand();
     }
   });
 </script>
