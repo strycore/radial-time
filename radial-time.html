@@ -25,7 +25,8 @@
       text-align: center;
       font-size: 4.2em;
       line-height: 1.7em;
-      font-weight: 300;
+      font-weight: 500;
+      letter-spacing: .04em;
       height: 1.7em;
       background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
       cursor: pointer;
@@ -209,12 +210,12 @@
               {
                   name: 'fade-out-animation',
                   node: this.$.hand,
-                  timing: {duration: 50}
+                  timing: {delay: 100, duration: 50}
               },
               {
                 name: 'fade-in-animation',
                 node: this.$.hand,
-                timing: {delay: 50, duration: 300}
+                timing: {delay: 50, duration: 200}
               }
             ]
           }
@@ -225,12 +226,14 @@
     listeners: {
       'hour.click': 'onHourClicked',
       'minute.click': 'onMinuteClicked',
-      'dial.down': 'onDialTrack',
+      'dial.tap': 'onDialTap',
       'dial.track': 'onDialTrack'
     },
+
     behaviors: [
       Polymer.NeonAnimationRunnerBehavior
     ],
+
     ready: function() { },
 
     attached: function() {
@@ -280,9 +283,24 @@
       }
     },
 
+    onDialTap: function(ev) {
+      this._updateDial(ev.detail.x, ev.detail.y);
+      this._switchToMinutes();
+    },
+
     onDialTrack: function(ev) {
       this._updateDial(ev.detail.x, ev.detail.y);
+      if (ev.detail.state == 'end') {
+        this._switchToMinutes();
+      }
     },
+
+    _switchToMinutes: function() {
+      if (this.selected == 'hour') {
+        this.async(this.onMinuteClicked, 300);
+      }
+    },
+
     _updateDial: function(x, y) {
       var dial = document.querySelector('#dial');
       var position = {
