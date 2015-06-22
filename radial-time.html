@@ -28,6 +28,7 @@
       font-weight: 300;
       height: 1.7em;
       background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
+      cursor: pointer;
     }
     .time .selected {
       color: var(--radial-time-highlight-color, #FF3333);
@@ -50,6 +51,7 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+      cursor: all-scroll;
     }
 
     .numbers {
@@ -58,6 +60,7 @@
       position: relative;
       top:50%; left:0%;
       transition: all .3s cubic-bezier(0.635, -0.580, 0.380, 0.870);
+
     }
     #hours.hidden {
       opacity: 0;
@@ -222,8 +225,8 @@
     listeners: {
       'hour.click': 'onHourClicked',
       'minute.click': 'onMinuteClicked',
-      'dial.mousedown': 'onDragStart',
-      'dial.touchstart': 'onDragStart'
+      'dial.down': 'onDialTrack',
+      'dial.track': 'onDialTrack'
     },
     behaviors: [
       Polymer.NeonAnimationRunnerBehavior
@@ -277,15 +280,14 @@
       }
     },
 
-    onDragStart: function(ev) {
+    onDialTrack: function(ev) {
+      this._updateDial(ev.detail.x, ev.detail.y);
+    },
+    _updateDial: function(x, y) {
       var dial = document.querySelector('#dial');
-      var left = dial.offsetLeft;
-      var top = dial.offsetTop;
-      var height = dial.offsetHeight;
-      var width = dial.offsetWidth;
       var position = {
-        x: ev.pageX - left - width / 2,
-        y: ev.pageY - top - height / 2
+        x: x - dial.offsetLeft - dial.offsetWidth / 2,
+        y: y - dial.offsetTop - dial.offsetHeight / 2
       };
       var angle = Math.atan2(position.y, position.x) * (180 / Math.PI);
       var step;
@@ -296,7 +298,6 @@
       }
 
       var steppedAngle = Math.round(angle / step);
-      angle = steppedAngle * step;
       if (this.selected == 'hour') {
         this.hour = ((steppedAngle + 2 + 12) % 12) + 1;
       } else {
