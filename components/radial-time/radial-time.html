@@ -1,0 +1,434 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-styles/paper-styles.html"/>
+<link rel="import" href="../neon-animation/neon-animation-runner-behavior.html"/>
+<link rel="import" href="../neon-animation/neon-animations.html"/>
+
+
+<!--
+@element radial-time
+@demo demo/index.html
+-->
+<dom-module id="radial-time">
+
+  <style>
+    :host {
+      display: block;
+      box-sizing: border-box;
+      background-color: var(--radial-time-primary-bg-color, #363636);
+      color: var(--radial-time-text-color, white);
+      font-family: "Roboto", Arial, sans-serif;
+      width: 20em;
+      font-weight: 500;
+      box-shadow: .1em .3em .3em rgba(0,0,0,.3);
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .time {
+      text-align: center;
+      font-size: 4.2em;
+      line-height: 1.7em;
+      font-weight: 500;
+      letter-spacing: .04em;
+      height: 1.7em;
+      background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
+      cursor: pointer;
+    }
+    .time sub {
+      vertical-align: baseline;
+      font-size: 0.33em;
+    }
+    .time .selected {
+      color: var(--radial-time-highlight-color, #FF3333);
+      animation: bounce 0.3s ease-out;
+    }
+    @keyframes bounce {
+      50% { transform: scale(0.9) }
+      75% { transform: scale(1.1) }
+    }
+    .dial {
+      margin: 1em 2em;
+      background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
+      width: 16em;
+      height: 16em;
+      border-radius: 50%;
+      position: relative;
+      cursor: all-scroll;
+    }
+
+    .numbers {
+      background-color: #006064;
+      display: block;
+      position: relative;
+      top:50%; left:0;
+      transition: all .3s cubic-bezier(0.635, -0.580, 0.380, 0.870);
+    }
+
+    #hours.hidden {
+      opacity: 0;
+      transform: scale(1.2);
+    }
+
+    #minutes.hidden {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    .dial span {
+      font-size: 1em;
+      display: block;
+      text-align: center;
+      width: 1.5em;
+      height: 1.5em;
+      position: absolute;
+      top:50%; left:50%;
+      line-height:1.6em;
+      margin-top:-.75em;
+      margin-left: -.75em;
+      font-weight:bold;
+    }
+
+    .dial .hand {
+      width: 0.08em;
+      height: 5.4em;
+      background-color: var(--radial-time-highlight-color, #FF3333);
+      top: 50%;
+      left: 50%;
+      position: absolute;
+      transform-origin: 0em 0em;
+      transform: rotate(270deg);
+    }
+    .dial .hand.small {
+      height: 3.8em;
+    }
+
+    .dial .hand:after {
+      width: 2.2em;
+      height: 2.2em;
+      background-color: var(--radial-time-highlight-color-alpha, rgba(255,0,0,.4));
+      border-radius: 50%;
+      display: block;
+      content: " ";
+      margin: -1.1em 0 0 -1.1em;
+      top: 6.45em;
+      left: 50%;
+      position: absolute;
+    }
+    .dial .hand.small:after {
+      top: 4.8em;
+    }
+    .dial .hand.activated {
+      height: 6.4em;
+    }
+
+    .dial .hand.activated:before {
+      width: .5em;
+      height: .5em;
+      background-color: var(--radial-time-highlight-color, #FF3333);
+      border-radius: 50%;
+      display: block;
+      content: " ";
+      margin: -.25em 0 0 -.25em;
+      top: 6.45em;
+      left: 50%;
+      position: absolute;
+    }
+
+    .am-pm-buttons {
+      position: relative;
+      margin-bottom: 3em;
+    }
+    .am-pm-buttons button {
+      background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
+      border: none;
+      border-radius: 50%;
+      height: 3em;
+      width: 3em;
+      font-size: 1em;
+      position: absolute;
+      top: -2em;
+      color: var(--radial-time-text-color, white);
+    }
+
+    .am-pm-buttons button.selected  {
+      background-color: var(--radial-time-highlight-color-alpha, rgba(255,0,0,.4));
+    }
+
+    #am-button { left: 2em; }
+    #pm-button { right: 2em; }
+
+    #button {
+      background-color: var(--radial-time-primary-bg-color, #363636);
+      color: var(--radial-time-text-color, white);
+      border: none;
+      width: 100%;
+      border-top: 1px solid #777;
+      display: block;
+      text-align: center;
+      line-height: 3em;
+    }
+    #button:active {
+      background-color: var(--radial-time-highlight-color, #FF3333)
+    }
+
+  </style>
+
+  <template>
+    <div class="time">
+      <span id="hour">{{_pad(hour, 2, 'hour')}}</span>:<span id="minute">{{_pad(minute, 2)}}</span>
+      <sub id="ampm">{{ampm}}</sub>
+    </div>
+    <div class="dial" id="dial">
+      <div class="numbers" id="hours">
+      </div>
+      <div class="numbers" id="minutes">
+        <span>05</span>
+        <span>10</span>
+        <span>15</span>
+        <span>20</span>
+        <span>25</span>
+        <span>30</span>
+        <span>35</span>
+        <span>40</span>
+        <span>45</span>
+        <span>50</span>
+        <span>55</span>
+        <span>00</span>
+      </div>
+      <div class="hand" id="hand"></div>
+    </div>
+    <div class="am-pm-buttons" id="am-pm-buttons">
+      <button id="am-button">AM</button>
+      <button id="pm-button">PM</button>
+    </div>
+    <button id="button">
+      Done
+    </button>
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+    is: 'radial-time',
+
+    properties: {
+      hour: Number,
+      minute: Number,
+      mode24h: {
+        type: Boolean,
+        value: false
+      },
+      ampm: {
+        type: String,
+        value: "AM",
+        observer: "onAmPmChanged"
+      },
+      selected: {
+        type: String,
+        value: "hour",
+        observer: "onSelectedChanged"
+      },
+      animationConfig: {
+        value: function() {
+          return {
+            'flash-hand': [
+              {
+                  name: 'fade-out-animation',
+                  node: this.$.hand,
+                  timing: {delay: 100, duration: 50}
+              },
+              {
+                name: 'fade-in-animation',
+                node: this.$.hand,
+                timing: {delay: 50, duration: 200}
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    listeners: {
+      'hour.click': 'onHourClicked',
+      'minute.click': 'onMinuteClicked',
+      'dial.tap': 'onDialTap',
+      'dial.track': 'onDialTrack',
+      'am-button.tap': 'onAmPmSwitch',
+      'pm-button.tap': 'onAmPmSwitch',
+      'ampm.tap': 'onAmPmSwitch',
+      'button.click': 'onDone'
+    },
+
+    behaviors: [
+      Polymer.NeonAnimationRunnerBehavior
+    ],
+
+    ready: function() {
+      if (this.mode24h) {
+        this.$['am-pm-buttons'].style.display = 'none';
+        this.$.ampm.style.display = 'none';
+      }
+
+      var hours = this.$.hours;
+      var number_hours = this.mode24h ? 24 : 12;
+      for (var h = 1; h < number_hours + 1; h++) {
+        var h_display;
+        if (h == 24) { h_display = '00' } else { h_display = h };
+        var hourText = document.createTextNode(h_display);
+        var hour = document.createElement('span');
+        hour.appendChild(hourText);
+        Polymer.dom(hours).appendChild(hour);
+      }
+
+      var numbers, dials = Polymer.dom(this.$.dial).querySelectorAll('.numbers');
+      for (var d = 0 ; d < dials.length; d++) {
+        numbers = Polymer.dom(dials[d]).querySelectorAll('span')
+        for (var n = 0; n < numbers.length; n++) {
+          var l = ((this.mode24h && n > 11 || dials[d].id != 'hours') || !this.mode24h) ? 6.5 : 4.8;
+          var a = (n - 2) * 0.5235987755982988;
+          var x = Math.cos(a) * l;
+          var y = Math.sin(a) * l;
+          var transformString = 'translate(' + x + 'em, ' + y + 'em)';
+          if (n > 11) {
+            transformString += ' scale(0.8)';
+          }
+          this.transform(transformString, numbers[n]);
+        }
+      }
+
+    },
+
+    attached: function() {
+      this._rotateHand();
+      this.onSelectedChanged(this.selected, this.selected);
+    },
+
+    _rotateHand: function() {
+      var angle;
+      if (this.selected == 'hour') {
+        angle = this.hour * 30;
+        this.toggleClass('small', this.mode24h && (this.hour < 13 && this.hour > 0), this.$.hand);
+        this.toggleClass('activated', false, this.$.hand);
+      } else {
+        angle = this.minute * 6;
+        this.toggleClass('small', false, this.$.hand);
+        this.toggleClass('activated', this.minute % 5 != 0, this.$.hand);
+      }
+      angle = angle - 180;
+      this.transform('rotate(' + angle + 'deg)', this.$.hand);
+
+    },
+
+    _pad: function(number, size, mode) {
+      if (mode == 'hour' && parseInt(number) > 0) {
+        return number;
+      }
+      number = number.toString();
+      while(number.length < size) {
+        number = '0' + number;
+      }
+      return number;
+    },
+
+    onHourClicked: function (ev) {
+      this.selected = 'hour';
+    },
+
+    onMinuteClicked: function (ev) {
+      this.selected = 'minute';
+    },
+
+    onSelectedChanged: function (newValue, oldValue) {
+      this.toggleClass('selected', this.selected == 'hour', this.$.hour);
+      this.toggleClass('selected', this.selected == 'minute', this.$.minute);
+
+      this.toggleClass('hidden', this.selected != 'hour', this.$.hours);
+      this.toggleClass('hidden', this.selected != 'minute', this.$.minutes);
+      this._rotateHand();
+
+      if (newValue != oldValue && oldValue) {
+        this.playAnimation('flash-hand');
+      }
+    },
+
+    onAmPmSwitch: function (ev) {
+      if(ev.target.id == 'am-button') {
+        this.ampm = 'AM';
+      } else if (ev.target.id == 'pm-button') {
+        this.ampm = 'PM';
+      } else if (this.ampm == 'PM') {
+        this.ampm = 'AM'
+      } else {
+        this.ampm = 'PM'
+      }
+    },
+
+    onAmPmChanged: function () {
+      this.toggleClass('selected', this.ampm == 'AM', this.$['am-button']);
+      this.toggleClass('selected', this.ampm == 'PM', this.$['pm-button']);
+    },
+
+    onDialTap: function(ev) {
+      this._updateDial(ev.detail.x, ev.detail.y);
+      this._switchToMinutes();
+    },
+
+    onDialTrack: function(ev) {
+      this._updateDial(ev.detail.x, ev.detail.y);
+      if (ev.detail.state == 'end') {
+        this._switchToMinutes();
+      }
+    },
+
+    onDone: function(ev) {
+      this.fire('done');
+    },
+
+    _switchToMinutes: function() {
+      if (this.selected == 'hour') {
+        this.async(this.onMinuteClicked, 300);
+      }
+    },
+
+    _updateDial: function(x, y) {
+      var dial = this.$.dial;
+      // Get position relative to the center of the dial
+      var rect = dial.getBoundingClientRect();
+      var position = {
+        x: x - rect.left - dial.offsetWidth / 2,
+        y: y - rect.top - dial.offsetHeight / 2
+      };
+      var angle = Math.atan2(position.y, position.x) * (180 / Math.PI);
+      var area = 'high';
+      if (this.mode24h) {
+        var distance = Math.sqrt(Math.pow(position.x, 2) + Math.pow(position.y, 2));
+        if (distance / dial.offsetWidth < 0.33) {
+          area = 'low';
+        }
+      }
+      var step;
+      if (this.selected == 'hour') {
+        step = 30;
+      } else {
+        step = 6;
+      }
+
+      var steppedAngle = Math.round(angle / step);
+      if (this.selected == 'hour') {
+        var hour = ((steppedAngle + 2 + 12) % 12) + 1;
+        if (area == 'high' && this.mode24h) {
+          hour += 12;
+          if (hour == 24) { hour = 0};
+        }
+        this.hour = hour;
+      } else {
+        this.minute = ((steppedAngle + 15 + 60) % 60);
+      }
+      this._rotateHand();
+    }
+  });
+</script>

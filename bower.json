@@ -1,0 +1,29 @@
+{
+  "name": "radial-time",
+  "version": "0.1.0",
+  "authors": [
+    "Mathieu Comandon <strider@strycore.com>"
+  ],
+  "description": "Time picker component based on Android's native widget.",
+  "keywords": [
+    "web-component",
+    "polymer",
+    "timepicker"
+  ],
+  "main": "time-input.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/strycore/radial-time/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.0.0",
+    "paper-styles": "PolymerElements/paper-styles#~1.0.5",
+    "neon-animation": "PolymerElements/neon-animation#^1.0.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "*"
+  }
+}
