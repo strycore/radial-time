@@ -58,5 +58,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </div>
     </div>
   </div>
+  <script>
+    (function () {
+      var timepickers = document.querySelectorAll('radial-time');
+      for(var i = 0; i < timepickers.length; i++) {
+        timepickers[i].addEventListener('done', function (ev) {
+          alert(ev.target.hour + ':' + ev.target.minute);
+        });
+      }
+    })();
+  </script>
   </body>
 </html>

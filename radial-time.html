@@ -160,9 +160,17 @@
     #pm-button { right: 2em; }
 
     #button {
-      text-align: center;
+      background-color: var(--radial-time-primary-bg-color, #363636);
+      color: var(--radial-time-text-color, white);
+      border: none;
+      width: 100%;
       border-top: 1px solid #777;
+      display: block;
+      text-align: center;
       line-height: 3em;
+    }
+    #button:active {
+      background-color: var(--radial-time-highlight-color, #FF3333)
     }
 
   </style>
@@ -195,9 +203,9 @@
       <button id="am-button">AM</button>
       <button id="pm-button">PM</button>
     </div>
-    <div id="button">
+    <button id="button">
       Done
-    </div>
+    </button>
   </template>
 
 </dom-module>
@@ -251,7 +259,8 @@
       'dial.track': 'onDialTrack',
       'am-button.tap': 'onAmPmSwitch',
       'pm-button.tap': 'onAmPmSwitch',
-      'ampm.tap': 'onAmPmSwitch'
+      'ampm.tap': 'onAmPmSwitch',
+      'button.click': 'onDone'
     },
 
     behaviors: [
@@ -373,6 +382,10 @@
       if (ev.detail.state == 'end') {
         this._switchToMinutes();
       }
+    },
+
+    onDone: function(ev) {
+      this.fire('done');
     },
 
     _switchToMinutes: function() {
