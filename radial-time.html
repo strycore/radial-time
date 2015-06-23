@@ -383,9 +383,11 @@
 
     _updateDial: function(x, y) {
       var dial = this.$.dial;
+      // Get position relative to the center of the dial
+      var rect = dial.getBoundingClientRect();
       var position = {
-        x: x - dial.offsetLeft - dial.offsetWidth / 2,
-        y: y - dial.offsetTop - dial.offsetHeight / 2
+        x: x - rect.left - dial.offsetWidth / 2,
+        y: y - rect.top - dial.offsetHeight / 2
       };
       var angle = Math.atan2(position.y, position.x) * (180 / Math.PI);
       var area = 'high';
