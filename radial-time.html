@@ -16,7 +16,7 @@
       box-sizing: border-box;
       background-color: var(--radial-time-primary-bg-color, #363636);
       color: white;
-      font-family: "Roboto", Arial, sans;
+      font-family: "Roboto", Arial, sans-serif;
       width: 20em;
       font-weight: 500;
       box-shadow: .1em .3em .3em rgba(0,0,0,.3);
@@ -92,7 +92,7 @@
 
     .dial .hand {
       width: 0.08em;
-      height: 5.2em;
+      height: 5.4em;
       background-color: var(--radial-time-highlight-color, #FF3333);
       top: 50%;
       left: 50%;
@@ -100,17 +100,24 @@
       transform-origin: 0em 0em;
       transform: rotate(270deg);
     }
+    .dial .hand.small {
+      height: 3.8em;
+    }
+
     .dial .hand:after {
-      width: 2.5em;
-      height: 2.5em;
+      width: 2.2em;
+      height: 2.2em;
       background-color: rgba(255,0,0,.4);
       border-radius: 50%;
       display: block;
       content: " ";
-      margin: -1.25em 0 0 -1.25em;
+      margin: -1.1em 0 0 -1.1em;
       top: 6.45em;
       left: 50%;
       position: absolute;
+    }
+    .dial .hand.small:after {
+      top: 4.8em;
     }
     .dial .hand.activated {
       height: 6.4em;
@@ -161,22 +168,10 @@
 
   <template>
     <div class="time">
-      <span id="hour">{{hour}}</span>:<span id="minute">{{_pad(minute, 2)}}</span><sub id="ampm">{{ampm}}</sub>
+      <span id="hour">{{_pad(hour, 2, 'hour')}}</span>:<span id="minute">{{_pad(minute, 2)}}</span><sub id="ampm">{{ampm}}</sub>
     </div>
     <div class="dial" id="dial">
       <div class="numbers" id="hours">
-        <span>1</span>
-        <span>2</span>
-        <span>3</span>
-        <span>4</span>
-        <span>5</span>
-        <span>6</span>
-        <span>7</span>
-        <span>8</span>
-        <span>9</span>
-        <span>10</span>
-        <span>11</span>
-        <span>12</span>
       </div>
       <div class="numbers" id="minutes">
         <span>05</span>
@@ -264,18 +259,36 @@
     ready: function() {
       if (this.mode24h) {
         this.$['am-pm-buttons'].style.display = 'none';
+        this.$.ampm.style.display = 'none';
       }
+
+      var hours = this.$.hours;
+      var number_hours = this.mode24h ? 24 : 12;
+      for (var h = 1; h < number_hours + 1; h++) {
+        var h_display;
+        if (h == 24) { h_display = '00' } else { h_display = h };
+        var hourText = document.createTextNode(h_display);
+        var hour = document.createElement('span');
+        hour.appendChild(hourText);
+        Polymer.dom(hours).appendChild(hour);
+      }
+
       var numbers, dials = document.querySelectorAll('.numbers');
-      var l = 6.5;  // Length of hand in em
       for (var d = 0 ; d < dials.length; d++) {
         numbers = dials[d].querySelectorAll('span')
         for (var n = 0; n < numbers.length; n++) {
-          var a = (n - 2) * 0.52;
+          var l = (this.mode24h && n > 11 || dials[d].id != 'hours') ? 6.5 : 4.8;
+          var a = (n - 2) * 0.5235987755982988;
           var x = Math.cos(a) * l;
           var y = Math.sin(a) * l;
-          this.transform('translate(' + x + 'em, ' + y + 'em)', numbers[n]);
+          var transformString = 'translate(' + x + 'em, ' + y + 'em)';
+          if (n > 11) {
+            transformString += ' scale(0.8)';
+          }
+          this.transform(transformString, numbers[n]);
         }
       }
+
     },
 
     attached: function() {
@@ -289,9 +302,11 @@
       var angle;
       if (this.selected == 'hour') {
         angle = this.hour * 30;
+        this.toggleClass('small', this.mode24h && (this.hour < 13 && this.hour > 0), this.$.hand);
         this.toggleClass('activated', false, this.$.hand);
       } else {
         angle = this.minute * 6;
+        this.toggleClass('small', false, this.$.hand);
         this.toggleClass('activated', this.minute % 5 != 0, this.$.hand);
       }
       angle = angle - 180;
@@ -299,7 +314,10 @@
 
     },
 
-    _pad: function(number, size) {
+    _pad: function(number, size, mode) {
+      if (mode == 'hour' && parseInt(number) > 0) {
+        return number;
+      }
       number = number.toString();
       while(number.length < size) {
         number = '0' + number;
@@ -370,6 +388,13 @@
         y: y - dial.offsetTop - dial.offsetHeight / 2
       };
       var angle = Math.atan2(position.y, position.x) * (180 / Math.PI);
+      var area = 'high';
+      if (this.mode24h) {
+        var distance = Math.sqrt(Math.pow(position.x, 2) + Math.pow(position.y, 2));
+        if (distance / dial.offsetWidth < 0.33) {
+          area = 'low';
+        }
+      }
       var step;
       if (this.selected == 'hour') {
         step = 30;
@@ -379,7 +404,12 @@
 
       var steppedAngle = Math.round(angle / step);
       if (this.selected == 'hour') {
-        this.hour = ((steppedAngle + 2 + 12) % 12) + 1;
+        var hour = ((steppedAngle + 2 + 12) % 12) + 1;
+        if (area == 'high' && this.mode24h) {
+          hour += 12;
+          if (hour == 24) { hour = 0};
+        }
+        this.hour = hour;
       } else {
         this.minute = ((steppedAngle + 15 + 60) % 60);
       }
