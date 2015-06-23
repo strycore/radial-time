@@ -15,14 +15,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <title>seed-element Demo</title>
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../../paper-styles/demo-pages.html">
+    <link rel="import" href="../../paper-styles/paper-styles.html">
     <link rel="import" href="../radial-time.html">
 
-    <style>
-      --radial-time-primary-bg-color: green;
-
+    <style is="custom-style">
+      radial-time.light {
+        --radial-time-primary-bg-color: #F2F2F2;
+        --radial-time-secondary-bg-color: #FFFFFF;
+        --radial-time-text-color: #8b8b8b;
+        --radial-time-highlight-color: #4cb2e4;
+        --radial-time-highlight-color-alpha: rgba(76, 178, 228, 0.4);
+      }
+      radial-time.small {
+        font-size: 0.75em;
+      }
     </style>
   </head>
   <body>
-    <radial-time hour="12" minute="00" mode24h></radial-time>
+  <div class="horizontal center-justified layout">
+    <div>
+      <h4>AM / PM Picker</h4>
+      <div class="horizontal-section">
+        <radial-time hour="3" minute="14"></radial-time>
+      </div>
+    </div>
+    <div>
+      <h4>24 h mode</h4>
+      <div class="horizontal-section">
+        <radial-time hour="15" minute="45" mode24h></radial-time>
+      </div>
+    </div>
+    <div>
+      <h4>Theme support</h4>
+      <div class="horizontal-section">
+        <radial-time hour="15" minute="45" class="light"></radial-time>
+      </div>
+    </div>
+    <div>
+      <h4>Responsive</h4>
+      <div class="horizontal-section">
+        <radial-time hour="15" minute="45" class="small"></radial-time>
+      </div>
+    </div>
+  </div>
   </body>
 </html>

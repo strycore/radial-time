@@ -15,7 +15,7 @@
       display: block;
       box-sizing: border-box;
       background-color: var(--radial-time-primary-bg-color, #363636);
-      color: white;
+      color: var(--radial-time-text-color, white);
       font-family: "Roboto", Arial, sans-serif;
       width: 20em;
       font-weight: 500;
@@ -50,7 +50,7 @@
     }
     .dial {
       margin: 1em 2em;
-      background-color: var(--radial-time-background, #3e3e3e);
+      background-color: var(--radial-time-secondary-bg-color, #3e3e3e);
       width: 16em;
       height: 16em;
       border-radius: 50%;
@@ -107,7 +107,7 @@
     .dial .hand:after {
       width: 2.2em;
       height: 2.2em;
-      background-color: rgba(255,0,0,.4);
+      background-color: var(--radial-time-highlight-color-alpha, rgba(255,0,0,.4));
       border-radius: 50%;
       display: block;
       content: " ";
@@ -146,13 +146,14 @@
       border-radius: 50%;
       height: 3em;
       width: 3em;
+      font-size: 1em;
       position: absolute;
       top: -2em;
-      color: #FFF;
+      color: var(--radial-time-text-color, white);
     }
 
     .am-pm-buttons button.selected  {
-      background-color: var(--radial-time-dark-hightlight, #8b2525);
+      background-color: var(--radial-time-highlight-color-alpha, rgba(255,0,0,.4));
     }
 
     #am-button { left: 2em; }
@@ -168,7 +169,8 @@
 
   <template>
     <div class="time">
-      <span id="hour">{{_pad(hour, 2, 'hour')}}</span>:<span id="minute">{{_pad(minute, 2)}}</span><sub id="ampm">{{ampm}}</sub>
+      <span id="hour">{{_pad(hour, 2, 'hour')}}</span>:<span id="minute">{{_pad(minute, 2)}}</span>
+      <sub id="ampm">{{ampm}}</sub>
     </div>
     <div class="dial" id="dial">
       <div class="numbers" id="hours">
@@ -273,11 +275,11 @@
         Polymer.dom(hours).appendChild(hour);
       }
 
-      var numbers, dials = document.querySelectorAll('.numbers');
+      var numbers, dials = Polymer.dom(this.$.dial).querySelectorAll('.numbers');
       for (var d = 0 ; d < dials.length; d++) {
-        numbers = dials[d].querySelectorAll('span')
+        numbers = Polymer.dom(dials[d]).querySelectorAll('span')
         for (var n = 0; n < numbers.length; n++) {
-          var l = (this.mode24h && n > 11 || dials[d].id != 'hours') ? 6.5 : 4.8;
+          var l = ((this.mode24h && n > 11 || dials[d].id != 'hours') || !this.mode24h) ? 6.5 : 4.8;
           var a = (n - 2) * 0.5235987755982988;
           var x = Math.cos(a) * l;
           var y = Math.sin(a) * l;
@@ -295,8 +297,6 @@
       this._rotateHand();
       this.onSelectedChanged(this.selected, this.selected);
     },
-
-    detached: function() { },
 
     _rotateHand: function() {
       var angle;
@@ -382,7 +382,7 @@
     },
 
     _updateDial: function(x, y) {
-      var dial = document.querySelector('#dial');
+      var dial = this.$.dial;
       var position = {
         x: x - dial.offsetLeft - dial.offsetWidth / 2,
         y: y - dial.offsetTop - dial.offsetHeight / 2
